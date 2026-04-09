@@ -28,5 +28,17 @@
   },
   "devDependencies": {
     "nodemon": "^3.1.4"
-  }
+  },
+  "directories": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pranitdhanade-sys/Nebulla.git"
+  },
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/pranitdhanade-sys/Nebulla/issues"
+  },
+  "homepage": "https://github.com/pranitdhanade-sys/Nebulla#readme"
 }

@@ -13,13 +13,14 @@ const config = {
   user: process.env.MYSQL_USER || 'root',
   password: process.env.MYSQL_PASSWORD || '',
   database: process.env.MYSQL_DATABASE || 'nebulla_arcade',
-  portApp: Number(process.env.PORT || 3000),
+  portApp: Number(process.env.PORT || 3009),
   sessionSecret: process.env.SESSION_SECRET || 'replace_me'
 };
 
 let pool;
 
 async function initializeDatabase() {
+  console.log(`[Connecting] Attempting to reach MySQL database at ${config.host}:${config.port}...`);
   const bootstrapConn = await mysql.createConnection({
     host: config.host,
     port: config.port,
