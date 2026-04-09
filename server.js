@@ -20,15 +20,16 @@ const config = {
 let pool;
 
 async function initializeDatabase() {
-  const bootstrapConnection = await mysql.createConnection({
+  const bootstrapConn = await mysql.createConnection({
     host: config.host,
     port: config.port,
     user: config.user,
-    password: config.password
+    password: config.password,
+    multipleStatements: true
   });
 
-  await bootstrapConnection.query(`CREATE DATABASE IF NOT EXISTS \`${config.database}\``);
-  await bootstrapConnection.end();
+  await bootstrapConn.query(`CREATE DATABASE IF NOT EXISTS \`${config.database}\``);
+  await bootstrapConn.end();
 
   pool = mysql.createPool({
     host: config.host,
@@ -37,7 +38,8 @@ async function initializeDatabase() {
     password: config.password,
     database: config.database,
     waitForConnections: true,
-    connectionLimit: 10
+    connectionLimit: 10,
+    queueLimit: 0
   });
 
   await pool.query(`
@@ -86,13 +88,9 @@ function isAuthenticated(req, res, next) {
   return next();
 }
 
-function validateEmail(email) {
+function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
-
-app.get('/', (req, res) => {
-  res.redirect('/login.html');
-});
 
 app.post('/api/signup', async (req, res) => {
   try {
@@ -106,7 +104,7 @@ app.post('/api/signup', async (req, res) => {
       return res.status(400).json({ message: 'Username must be 3-30 characters.' });
     }
 
-    if (!validateEmail(email)) {
+    if (!isValidEmail(email)) {
       return res.status(400).json({ message: 'Please use a valid email address.' });
     }
 
@@ -118,28 +116,31 @@ app.post('/api/signup', async (req, res) => {
 
     const [result] = await pool.query(
       'INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)',
-      [username.trim(), email.toLowerCase(), passwordHash]
+      [username, email.toLowerCase(), passwordHash]
+    );
+
+    await pool.query(
+      'INSERT INTO activity_log (user_id, event_type, event_text) VALUES (?, ?, ?)',
+      [result.insertId, 'signup', 'Joined Nebulla Arcade']
     );
 
     req.session.user = {
       id: result.insertId,
-      username: username.trim(),
+      username,
       email: email.toLowerCase()
     };
 
-    await pool.query(
-      'INSERT INTO activity_log (user_id, event_type, event_text) VALUES (?, ?, ?)',
-      [result.insertId, 'signup', 'Created a new account']
-    );
-
-    return res.status(201).json({ message: 'Account created!', user: req.session.user });
+    return res.status(201).json({
+      message: 'Account created successfully!',
+      user: req.session.user
+    });
   } catch (error) {
     if (error && error.code === 'ER_DUP_ENTRY') {
       return res.status(409).json({ message: 'Username or email already exists.' });
     }
 
     console.error(error);
-    return res.status(500).json({ message: 'Could not create account.' });
+    return res.status(500).json({ message: 'Failed to create account.' });
   }
 });
 
@@ -156,14 +157,14 @@ app.post('/api/login', async (req, res) => {
       [identity.toLowerCase(), identity]
     );
 
-    if (!rows.length) {
+    if (rows.length === 0) {
       return res.status(401).json({ message: 'Invalid credentials.' });
     }
 
     const user = rows[0];
-    const passwordOk = await bcrypt.compare(password, user.password_hash);
+    const valid = await bcrypt.compare(password, user.password_hash);
 
-    if (!passwordOk) {
+    if (!valid) {
       return res.status(401).json({ message: 'Invalid credentials.' });
     }
 
@@ -175,23 +176,23 @@ app.post('/api/login', async (req, res) => {
 
     await pool.query(
       'INSERT INTO activity_log (user_id, event_type, event_text) VALUES (?, ?, ?)',
-      [user.id, 'login', 'Logged into dashboard']
+      [user.id, 'login', 'Logged into Nebulla Dashboard']
     );
 
-    return res.status(200).json({ message: 'Login successful!', user: req.session.user });
+    return res.json({ message: 'Welcome back!', user: req.session.user });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: 'Could not login.' });
+    return res.status(500).json({ message: 'Login failed.' });
   }
 });
 
-app.post('/api/logout', isAuthenticated, (req, res) => {
-  req.session.destroy((error) => {
-    if (error) {
-      return res.status(500).json({ message: 'Could not logout.' });
+app.post('/api/logout', (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      return res.status(500).json({ message: 'Could not log out.' });
     }
 
-    return res.status(200).json({ message: 'Logout successful.' });
+    return res.json({ message: 'Logged out.' });
   });
 });
 
@@ -210,17 +211,17 @@ app.get('/api/dashboard', isAuthenticated, async (req, res) => {
        FROM activity_log
        WHERE user_id = ?
        ORDER BY created_at DESC
-       LIMIT 10`,
+       LIMIT 8`,
       [req.session.user.id]
     );
 
-    return res.status(200).json({
+    return res.json({
       profile: req.session.user,
       stats: {
-        rank: 'Neon Captain',
-        xp: 2450,
-        credits: 1320,
-        streak: 9
+        rank: 'Star Ranger',
+        xp: 1840,
+        credits: 920,
+        streak: 6
       },
       activity
     });
@@ -230,16 +231,16 @@ app.get('/api/dashboard', isAuthenticated, async (req, res) => {
   }
 });
 
-async function startServer() {
+async function bootstrap() {
   try {
     await initializeDatabase();
     app.listen(config.portApp, () => {
-      console.log(`Nebulla is running at http://localhost:${config.portApp}`);
+      console.log(`Nebulla Arcade running on http://localhost:${config.portApp}`);
     });
   } catch (error) {
-    console.error('Server startup failed:', error.message);
+    console.error('Startup failed:', error.message);
     process.exit(1);
   }
 }
 
-startServer();
+bootstrap();
