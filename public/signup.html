@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nebulla Signup</title>
+    <link rel="stylesheet" href="shared.css" />
+    <link rel="stylesheet" href="signup.css" />
+  </head>
+  <body>
+    <div class="space-bg"></div>
+    <main class="page">
+      <section class="pixel-card">
+        <h1 class="title hero-title">Create Your Pilot Profile</h1>
+        <p class="sub">Sign up to unlock your dashboard and start collecting xp.</p>
+
+        <nav class="nav-links">
+          <a href="/login.html">Login</a>
+          <a href="/signup.html">Create Account</a>
+        </nav>
+
+        <div class="form-layout">
+          <form id="signupForm">
+            <label for="username">Username</label>
+            <input id="username" name="username" required minlength="3" maxlength="30" />
+
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" required />
+
+            <label for="password">Password</label>
+            <input id="password" name="password" type="password" required minlength="6" />
+
+            <button class="btn btn-primary" type="submit">Create Account</button>
+            <p class="msg" id="msg"></p>
+          </form>
+
+          <aside class="sprite-zone">
+            <div class="sprite" aria-hidden="true"></div>
+            <p class="sprite-label">Guide Sprite</p>
+          </aside>
+        </div>
+      </section>
+    </main>
+
+    <script src="api.js"></script>
+    <script src="signup.js"></script>
+  </body>
+</html>

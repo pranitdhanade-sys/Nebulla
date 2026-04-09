@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nebulla Login</title>
+    <link rel="stylesheet" href="shared.css" />
+    <link rel="stylesheet" href="login.css" />
+  </head>
+  <body>
+    <div class="space-bg"></div>
+    <main class="page">
+      <section class="pixel-card">
+        <h1 class="title hero-title">Nebulla Login Portal</h1>
+        <p class="sub">Use your username/email and jump back into the neon world.</p>
+
+        <nav class="nav-links">
+          <a href="/login.html">Login</a>
+          <a href="/signup.html">Create Account</a>
+        </nav>
+
+        <div class="form-layout">
+          <form id="loginForm">
+            <label for="identity">Username or Email</label>
+            <input id="identity" name="identity" required />
+
+            <label for="password">Password</label>
+            <input id="password" name="password" type="password" required minlength="6" />
+
+            <button class="btn btn-primary" type="submit">Login</button>
+            <p class="msg" id="msg"></p>
+          </form>
+
+          <aside class="sprite-zone">
+            <div class="sprite" aria-hidden="true"></div>
+            <p class="sprite-label">Checkpoint Sprite</p>
+          </aside>
+        </div>
+      </section>
+    </main>
+
+    <script src="api.js"></script>
+    <script src="login.js"></script>
+  </body>
+</html>
