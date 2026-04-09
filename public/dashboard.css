@@ -1,0 +1,39 @@
+.stats {
+  margin-top: 1rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 0.8rem;
+}
+
+.stat-box {
+  border: 3px solid #14053b;
+  border-radius: 8px;
+  background: linear-gradient(180deg, rgba(255, 180, 110, 0.9), rgba(255, 115, 222, 0.9));
+  color: #20063f;
+  padding: 0.6rem;
+  font-weight: 800;
+}
+
+.activity {
+  margin-top: 1rem;
+  border-top: 3px dashed #7df4ff;
+  padding-top: 0.8rem;
+}
+
+.activity ul {
+  margin: 0;
+  padding-left: 1rem;
+}
+
+.activity li {
+  margin-top: 0.45rem;
+  color: #ffe5a7;
+}
+
+.top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.9rem;
+  flex-wrap: wrap;
+}

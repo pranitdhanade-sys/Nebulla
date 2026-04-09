@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nebulla Dashboard</title>
+    <link rel="stylesheet" href="shared.css" />
+    <link rel="stylesheet" href="dashboard.css" />
+  </head>
+  <body>
+    <div class="space-bg"></div>
+    <main class="page">
+      <section class="pixel-card">
+        <div class="top-row">
+          <div>
+            <h1 class="title">Nebulla Dashboard</h1>
+            <p class="sub" id="welcome">Loading profile...</p>
+          </div>
+          <div>
+            <button id="logoutBtn" class="btn btn-secondary">Logout</button>
+          </div>
+        </div>
+
+        <div class="stats" id="stats"></div>
+
+        <section class="activity">
+          <h2 class="title" style="font-size: 1rem">Recent Activity</h2>
+          <ul id="activityList"></ul>
+        </section>
+      </section>
+    </main>
+
+    <script src="api.js"></script>
+    <script src="dashboard.js"></script>
+  </body>
+</html>
