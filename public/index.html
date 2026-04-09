@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nebulla Arcade</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="bg-stars"></div>
+    <main class="layout">
+      <section class="auth-card" id="authCard">
+        <h1 class="logo">NEBULLA ARCADE</h1>
+        <p class="tagline">PIXEL LOGIN HUB // ENTER THE GALAXY</p>
+
+        <div class="tabs">
+          <button class="tab active" data-view="login">LOGIN</button>
+          <button class="tab" data-view="signup">SIGN UP</button>
+        </div>
+
+        <form id="loginForm" class="panel active">
+          <label>Username or Email</label>
+          <input name="identity" required />
+          <label>Password</label>
+          <input name="password" type="password" required minlength="6" />
+          <button type="submit" class="btn-primary">START SESSION</button>
+        </form>
+
+        <form id="signupForm" class="panel">
+          <label>Username</label>
+          <input name="username" required minlength="3" maxlength="30" />
+          <label>Email</label>
+          <input name="email" type="email" required />
+          <label>Password</label>
+          <input name="password" type="password" required minlength="6" />
+          <button type="submit" class="btn-primary">CREATE PROFILE</button>
+        </form>
+
+        <p id="message" class="message"></p>
+      </section>
+
+      <section class="dashboard hidden" id="dashboard">
+        <header class="dash-head">
+          <h2 id="welcomeText">WELCOME</h2>
+          <button id="logoutBtn" class="btn-secondary">LOGOUT</button>
+        </header>
+
+        <div class="stats-grid" id="statsGrid"></div>
+
+        <div class="activity-panel">
+          <h3>RECENT QUEST LOG</h3>
+          <ul id="activityList"></ul>
+        </div>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>

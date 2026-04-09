@@ -1,0 +1,239 @@
+:root {
+  --bg-1: #10041f;
+  --bg-2: #230648;
+  --cyan: #43f8ff;
+  --pink: #ff59c7;
+  --gold: #ffe468;
+  --panel: rgba(16, 3, 34, 0.84);
+  --line: #7a44ff;
+  --text: #e9f2ff;
+  --danger: #ff7787;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: 'VT323', monospace;
+  color: var(--text);
+  background: radial-gradient(circle at top, #341169 0%, var(--bg-1) 40%, #090113 100%);
+  overflow-x: hidden;
+}
+
+.bg-stars {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle, rgba(255, 255, 255, 0.85) 1px, transparent 1.5px),
+    radial-gradient(circle, rgba(67, 248, 255, 0.8) 1px, transparent 1.5px),
+    radial-gradient(circle, rgba(255, 89, 199, 0.55) 1px, transparent 1.5px);
+  background-size: 110px 110px, 150px 150px, 210px 210px;
+  animation: drift 12s linear infinite;
+  opacity: 0.6;
+}
+
+.layout {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 2.5rem 1rem;
+}
+
+.auth-card,
+.dashboard {
+  border: 4px solid var(--line);
+  background: var(--panel);
+  box-shadow: 0 0 0 3px #000, 0 0 30px rgba(67, 248, 255, 0.35);
+  border-radius: 10px;
+  padding: 1.5rem;
+  backdrop-filter: blur(2px);
+}
+
+.logo {
+  margin: 0;
+  font-family: 'Press Start 2P', cursive;
+  font-size: clamp(1rem, 2vw, 1.4rem);
+  color: var(--gold);
+  text-shadow: 0 0 6px rgba(255, 228, 104, 0.8);
+}
+
+.tagline {
+  margin: 0.9rem 0 1.5rem;
+  color: var(--cyan);
+  letter-spacing: 1px;
+}
+
+.tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+}
+
+.tab,
+button {
+  font-family: 'Press Start 2P', cursive;
+  cursor: pointer;
+  border: 3px solid #000;
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.tab {
+  font-size: 0.6rem;
+  padding: 0.85rem;
+  background: #2b1162;
+  color: #d0b7ff;
+}
+
+.tab.active {
+  background: linear-gradient(180deg, #7e57ff, #5222d6);
+  color: #fff;
+}
+
+.panel {
+  display: none;
+}
+
+.panel.active {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+label {
+  margin-top: 0.5rem;
+  letter-spacing: 1px;
+  color: var(--cyan);
+}
+
+input {
+  font-family: 'VT323', monospace;
+  font-size: 1.4rem;
+  color: #fff;
+  background: #150832;
+  border: 3px solid #5b2ad4;
+  outline: none;
+  padding: 0.6rem;
+}
+
+input:focus {
+  border-color: var(--cyan);
+  box-shadow: 0 0 14px rgba(67, 248, 255, 0.35);
+}
+
+.btn-primary,
+.btn-secondary {
+  margin-top: 1rem;
+  padding: 0.9rem;
+  color: #060912;
+}
+
+.btn-primary {
+  background: linear-gradient(180deg, #48fff2, #00d0f8);
+}
+
+.btn-secondary {
+  background: linear-gradient(180deg, #ffc1ea, #ff59c7);
+}
+
+button:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+}
+
+.message {
+  min-height: 1.5rem;
+  margin-top: 1rem;
+  color: var(--gold);
+}
+
+.message.error {
+  color: var(--danger);
+}
+
+.hidden {
+  display: none;
+}
+
+.dashboard {
+  margin-top: 1.4rem;
+}
+
+.dash-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  border-bottom: 2px dashed #6841d4;
+  padding-bottom: 0.8rem;
+}
+
+.stats-grid {
+  margin: 1rem 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.8rem;
+}
+
+.stat-box {
+  border: 3px solid #4e2cb3;
+  background: rgba(26, 12, 56, 0.9);
+  padding: 0.8rem;
+}
+
+.stat-box h4 {
+  margin: 0 0 0.3rem;
+  color: var(--cyan);
+}
+
+.stat-box p {
+  margin: 0;
+  font-size: 1.5rem;
+  color: var(--gold);
+}
+
+.activity-panel {
+  border-top: 2px dashed #6841d4;
+  padding-top: 0.8rem;
+}
+
+.activity-panel h3 {
+  margin: 0 0 0.5rem;
+  color: var(--pink);
+}
+
+.activity-panel ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.activity-panel li {
+  background: #160938;
+  border: 2px solid #5530c9;
+  padding: 0.6rem;
+  margin-top: 0.5rem;
+}
+
+@keyframes drift {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(110px);
+  }
+}
+
+@media (max-width: 600px) {
+  .tab {
+    font-size: 0.5rem;
+  }
+
+  .dash-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
