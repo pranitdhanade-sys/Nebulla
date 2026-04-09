@@ -4,25 +4,32 @@ const express = require('express');
 const session = require('express-session');
 const bcrypt = require('bcryptjs');
 const mysql = require('mysql2/promise');
-const { loadConfig } = require('./src/config');
-const { mapDatabaseStartupError } = require('./src/db-errors');
 
 const app = express();
-const config = loadConfig();
+
+const config = {
+  host: process.env.MYSQL_HOST || 'localhost',
+  port: Number(process.env.MYSQL_PORT || 3306),
+  user: process.env.MYSQL_USER || 'root',
+  password: process.env.MYSQL_PASSWORD || '',
+  database: process.env.MYSQL_DATABASE || 'nebulla_arcade',
+  portApp: Number(process.env.PORT || 3000),
+  sessionSecret: process.env.SESSION_SECRET || 'replace_me'
+};
 
 let pool;
 
 async function initializeDatabase() {
-  const bootstrapConnection = await mysql.createConnection({
+  const bootstrapConn = await mysql.createConnection({
     host: config.host,
     port: config.port,
     user: config.user,
     password: config.password,
-    connectTimeout: config.mysqlConnectTimeout
+    multipleStatements: true
   });
 
-  await bootstrapConnection.query(`CREATE DATABASE IF NOT EXISTS \`${config.database}\``);
-  await bootstrapConnection.end();
+  await bootstrapConn.query(`CREATE DATABASE IF NOT EXISTS \`${config.database}\``);
+  await bootstrapConn.end();
 
   pool = mysql.createPool({
     host: config.host,
@@ -32,7 +39,7 @@ async function initializeDatabase() {
     database: config.database,
     waitForConnections: true,
     connectionLimit: 10,
-    connectTimeout: config.mysqlConnectTimeout
+    queueLimit: 0
   });
 
   await pool.query(`
@@ -81,26 +88,9 @@ function isAuthenticated(req, res, next) {
   return next();
 }
 
-function validateEmail(email) {
+function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
-
-app.get('/', (req, res) => {
-  res.redirect('/login.html');
-});
-
-app.get('/api/health', async (req, res) => {
-  try {
-    if (!pool) {
-      return res.status(503).json({ ok: false, message: 'DB pool not initialized' });
-    }
-
-    await pool.query('SELECT 1');
-    return res.status(200).json({ ok: true, database: config.database });
-  } catch (error) {
-    return res.status(503).json({ ok: false, message: 'DB not reachable', detail: error.code || error.message });
-  }
-});
 
 app.post('/api/signup', async (req, res) => {
   try {
@@ -114,7 +104,7 @@ app.post('/api/signup', async (req, res) => {
       return res.status(400).json({ message: 'Username must be 3-30 characters.' });
     }
 
-    if (!validateEmail(email)) {
+    if (!isValidEmail(email)) {
       return res.status(400).json({ message: 'Please use a valid email address.' });
     }
 
@@ -126,28 +116,31 @@ app.post('/api/signup', async (req, res) => {
 
     const [result] = await pool.query(
       'INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)',
-      [username.trim(), email.toLowerCase(), passwordHash]
+      [username, email.toLowerCase(), passwordHash]
+    );
+
+    await pool.query(
+      'INSERT INTO activity_log (user_id, event_type, event_text) VALUES (?, ?, ?)',
+      [result.insertId, 'signup', 'Joined Nebulla Arcade']
     );
 
     req.session.user = {
       id: result.insertId,
-      username: username.trim(),
+      username,
       email: email.toLowerCase()
     };
 
-    await pool.query(
-      'INSERT INTO activity_log (user_id, event_type, event_text) VALUES (?, ?, ?)',
-      [result.insertId, 'signup', 'Created a new account']
-    );
-
-    return res.status(201).json({ message: 'Account created!', user: req.session.user });
+    return res.status(201).json({
+      message: 'Account created successfully!',
+      user: req.session.user
+    });
   } catch (error) {
     if (error && error.code === 'ER_DUP_ENTRY') {
       return res.status(409).json({ message: 'Username or email already exists.' });
     }
 
-    console.error('Signup error:', error);
-    return res.status(500).json({ message: 'Could not create account.' });
+    console.error(error);
+    return res.status(500).json({ message: 'Failed to create account.' });
   }
 });
 
@@ -164,14 +157,14 @@ app.post('/api/login', async (req, res) => {
       [identity.toLowerCase(), identity]
     );
 
-    if (!rows.length) {
+    if (rows.length === 0) {
       return res.status(401).json({ message: 'Invalid credentials.' });
     }
 
     const user = rows[0];
-    const passwordOk = await bcrypt.compare(password, user.password_hash);
+    const valid = await bcrypt.compare(password, user.password_hash);
 
-    if (!passwordOk) {
+    if (!valid) {
       return res.status(401).json({ message: 'Invalid credentials.' });
     }
 
@@ -183,23 +176,23 @@ app.post('/api/login', async (req, res) => {
 
     await pool.query(
       'INSERT INTO activity_log (user_id, event_type, event_text) VALUES (?, ?, ?)',
-      [user.id, 'login', 'Logged into dashboard']
+      [user.id, 'login', 'Logged into Nebulla Dashboard']
     );
 
-    return res.status(200).json({ message: 'Login successful!', user: req.session.user });
+    return res.json({ message: 'Welcome back!', user: req.session.user });
   } catch (error) {
-    console.error('Login error:', error);
-    return res.status(500).json({ message: 'Could not login.' });
+    console.error(error);
+    return res.status(500).json({ message: 'Login failed.' });
   }
 });
 
-app.post('/api/logout', isAuthenticated, (req, res) => {
-  req.session.destroy((error) => {
-    if (error) {
-      return res.status(500).json({ message: 'Could not logout.' });
+app.post('/api/logout', (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      return res.status(500).json({ message: 'Could not log out.' });
     }
 
-    return res.status(200).json({ message: 'Logout successful.' });
+    return res.json({ message: 'Logged out.' });
   });
 });
 
@@ -218,38 +211,36 @@ app.get('/api/dashboard', isAuthenticated, async (req, res) => {
        FROM activity_log
        WHERE user_id = ?
        ORDER BY created_at DESC
-       LIMIT 10`,
+       LIMIT 8`,
       [req.session.user.id]
     );
 
-    return res.status(200).json({
+    return res.json({
       profile: req.session.user,
       stats: {
-        rank: 'Neon Captain',
-        xp: 2450,
-        credits: 1320,
-        streak: 9
+        rank: 'Star Ranger',
+        xp: 1840,
+        credits: 920,
+        streak: 6
       },
       activity
     });
   } catch (error) {
-    console.error('Dashboard error:', error);
+    console.error(error);
     return res.status(500).json({ message: 'Could not load dashboard.' });
   }
 });
 
-async function startServer() {
+async function bootstrap() {
   try {
     await initializeDatabase();
     app.listen(config.portApp, () => {
-      console.log(`Nebulla is running at http://localhost:${config.portApp}`);
-      console.log(`Using MySQL at ${config.host}:${config.port} with timeout ${config.mysqlConnectTimeout}ms`);
+      console.log(`Nebulla Arcade running on http://localhost:${config.portApp}`);
     });
   } catch (error) {
-    const friendlyMessage = mapDatabaseStartupError(error, config);
-    console.error('Startup failed:', friendlyMessage);
+    console.error('Startup failed:', error.message);
     process.exit(1);
   }
 }
 
-startServer();
+bootstrap();

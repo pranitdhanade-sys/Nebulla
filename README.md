@@ -12,17 +12,35 @@ Bright retro auth app built with Node.js + Express + MySQL.
 - Sprite-style animated character blocks in auth pages
 - Session-based auth with signup/login/logout
 - Auto-creates MySQL database + tables if missing (XAMPP/phpMyAdmin friendly)
-- Improved startup error handling for DB connection problems (`ETIMEDOUT`, `ECONNREFUSED`, auth errors)
 
 ## Setup
 
 1. Install dependencies
+Nebulla is a pixel-game themed authentication app with:
+
+- Login + signup flow.
+- Session-based auth.
+- Protected dashboard.
+- Auto database creation in MySQL (works with XAMPP/phpMyAdmin).
+- Retro pixel UI style (fonts, neon palette, animations).
+
+## Tech Stack
+
+- Node.js + Express
+- MySQL (via `mysql2`)
+- Vanilla HTML/CSS/JS frontend
+- `express-session` for session management
+
+## 1) Install dependencies
 
 ```bash
 npm install
 ```
 
 2. Create env file
+## 2) Configure environment
+
+Copy `.env.example` into `.env` and update values as needed:
 
 ```bash
 cp .env.example .env
@@ -36,12 +54,24 @@ MYSQL_PORT=3306
 MYSQL_USER=root
 MYSQL_PASSWORD=
 MYSQL_DATABASE=nebulla_arcade
-MYSQL_CONNECT_TIMEOUT=10000
 ```
 
 4. Start XAMPP MySQL server.
 
 5. Run app
+Typical XAMPP values:
+
+- `MYSQL_HOST=localhost`
+- `MYSQL_PORT=3306`
+- `MYSQL_USER=root`
+- `MYSQL_PASSWORD=` (empty)
+- `MYSQL_DATABASE=nebulla_arcade`
+
+## 3) Start XAMPP MySQL
+
+Open XAMPP Control Panel and start **MySQL**.
+
+## 4) Run the app
 
 ```bash
 npm start
@@ -51,22 +81,17 @@ Open:
 - `http://localhost:3000/login.html`
 - `http://localhost:3000/signup.html`
 - `http://localhost:3000/dashboard.html`
+Open: [http://localhost:3000](http://localhost:3000)
 
-## Testing
+## What is auto-created?
 
-```bash
-npm run check
-npm test
-```
+At startup, the server automatically:
 
-## Troubleshooting startup timeout (`ETIMEDOUT`)
+1. Creates database if it does not exist: `nebulla_arcade`
+2. Creates `users` table.
+3. Creates `activity_log` table.
 
-If you see startup timeout errors:
-
-- Ensure MySQL is started in XAMPP control panel.
-- Verify `MYSQL_HOST` and `MYSQL_PORT` are correct (`localhost` and `3306` by default).
-- Ensure firewall/antivirus is not blocking the MySQL port.
-- Increase `MYSQL_CONNECT_TIMEOUT` to `20000` if startup is slow.
+So you can inspect the DB right away in phpMyAdmin after first run.
 
 ## API Routes
 
@@ -74,5 +99,5 @@ If you see startup timeout errors:
 - `POST /api/login`
 - `POST /api/logout`
 - `GET /api/me`
-- `GET /api/dashboard` (requires auth)
-- `GET /api/health`
+- `GET /api/dashboard` (auth required)
+
